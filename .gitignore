@@ -1,7 +1,11 @@
+!*
+
 #
 # Kbuild ignores
 #
 .*
+!.github
+
 *.o
 *.o.*
 *.a

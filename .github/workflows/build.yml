@@ -44,5 +44,11 @@ jobs:
         export ARCH="${{ matrix.platform.arch }}"
         export CROSS_COMPILE="${{ matrix.platform.gcc_prefix }}-"
 
-        # make -j$(nproc) install
-        make install
+        make -j$(nproc) install
+
+    - name: upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: busybox-${{ matrix.platform.arch }}
+        path: |
+          _install/bin/busybox

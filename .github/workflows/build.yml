@@ -1,4 +1,4 @@
-name: build
+name: cross compile build
 
 on:
   push:
@@ -13,24 +13,24 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        arch:
-          - arm
-          - amd64
+        platform:
+          - gcc_prefix: arm-linux-gnueabi
+            arch: arm
 
     steps:
     - uses: actions/checkout@v4
 
     - name: install dependecies
       run: |
-        apt-get update
-        apt-get install -y gcc-"${{ matrix.arch }}"-linux-gnueabi libncurses5-dev
+        sudo apt-get update
+        sudo apt-get install --yes "gcc-${{ matrix.platform.gcc_prefix }}" libncurses5-dev
 
     - name: configure
       run: |
-        export ARCH="${{ matrix.arch }}"
-        export CROSS_COMPILE=gcc-"${{ matrix.arch }}"-linux-gnueabi-
+        export ARCH="${{ matrix.platform.arch }}"
+        export CROSS_COMPILE="${{ matrix.platform.gcc_prefix }}-"
 
-        if [[ -f "busybox.config" ]; then
+        if [ -f busybox.config ]; then
           echo "building from busybox.config"
           cp busybox.config .config
           yes "" | make oldconfig
@@ -41,7 +41,8 @@ jobs:
 
     - name: make
       run: |
-        export ARCH="${{ matrix.arch }}"
-        export CROSS_COMPILE=gcc-"${{ matrix.arch }}"-linux-gnueabi-
+        export ARCH="${{ matrix.platform.arch }}"
+        export CROSS_COMPILE="${{ matrix.platform.gcc_prefix }}-"
 
-        make -j$(nproc) install
+        # make -j$(nproc) install
+        make install

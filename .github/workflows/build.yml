@@ -13,8 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform:
-          - gcc_prefix: arm-linux-gnueabi
+        target:
+          - name: rinkhals
+            gcc_prefix: arm-linux-gnueabi
             arch: arm
 
     steps:
@@ -23,20 +24,20 @@ jobs:
     - name: install dependecies
       run: |
         sudo apt-get update
-        sudo apt-get install --yes "gcc-${{ matrix.platform.gcc_prefix }}" libncurses5-dev
+        sudo apt-get install --yes "gcc-${{ matrix.target.gcc_prefix }}" libncurses5-dev
 
     - name: make
       run: |
-        export ARCH="${{ matrix.platform.arch }}"
-        export CROSS_COMPILE="${{ matrix.platform.gcc_prefix }}-"
+        export ARCH="${{ matrix.target.arch }}"
+        export CROSS_COMPILE="${{ matrix.target.gcc_prefix }}-"
 
         make distclean
-        make rinkhals_defconfig
+        cp configs/${{ matrix.target.name }}_defconfig .config
         make -j$(nproc) install
 
     - name: upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: busybox-${{ matrix.platform.arch }}
+        name: busybox-${{ matrix.target.name }}-${{ matrix.target.arch }}
         path: |
           _install/bin/busybox

@@ -1,0 +1,58 @@
+version: "3"
+
+vars:
+  RINKHALS_CONFIG: rinkhals
+  DC_SERVICE_NAME: builder
+
+env:
+  GCC_PREFIX: arm-linux-gnueabi
+  ARCH: arm
+
+tasks:
+  .compose:
+    internal: true
+    cmd:
+      docker compose run
+        --rm
+        --remove-orphans
+        {{ .DC_SERVICE_NAME }}
+        bash -c "{{ .cmd }}"
+
+  run:
+    desc: Run a shell in the builder
+    cmds:
+      - task: .compose
+        vars:
+          cmd: bash
+
+  menuconfig:
+    desc: Edit the build (kconfig) configuration.
+    cmds:
+      - task: .compose
+        vars:
+          cmd: make menuconfig
+      - cp .config configs/{{ .RINKHALS_CONFIG }}_defconfig
+
+  build.builder:
+    desc: Build the build container
+    cmds:
+      - docker compose build 
+          --build-arg ARCH=$ARCH
+          --build-arg GCC_PREFIX=$GCC_PREFIX
+          --no-cache
+          {{ .DC_SERVICE_NAME }}
+
+  build:
+    desc: Build busybox
+    cmds:
+      - cp configs/{{ .RINKHALS_CONFIG }}_defconfig .config
+      - task: .compose
+        vars:
+          cmd: make -j$(nproc) install
+
+  distclean:
+    desc: Clean distribution
+    cmds:
+      - task: .compose
+        vars:
+          cmd: make distclean

@@ -1,0 +1,35 @@
+# docker compose run builder
+
+services:
+  builder:
+    container_name: builder
+#    user: <uid:gid>
+    build:
+      dockerfile: builder.Dockerfile
+      context: .
+#    develop:
+#      watch:
+#        # https://grafana.com/docs/grafana/latest/administration/configure-docker/
+#        - action: sync+restart
+#          path: ../../volumes/{{ svc.name }}/lib/
+#          target: /var/lib/grafana
+#        - action: sync+restart
+#          path: ../../volumes/{{ svc.name }}/datasources.yaml
+#          target: /etc/grafana/provisioning/datasources/datasources.yaml
+#        - action: sync+restart
+#          path: ../../volumes/{{ svc.name }}/dashboards.yaml
+#          target: /etc/grafana/provisioning/dashboards/dashboards.yaml
+#        - action: sync+restart
+#          path: ../../volumes/{{ svc.name }}/grafana.ini
+#          target: /etc/grafana/grafana.ini
+#        - action: sync+restart
+#          path: /etc/ssl/certs/ca-certificates.crt
+#          target: /etc/ssl/certs/ca-certificates.crt
+#        - action: sync
+#          path: ../../volumes/{{ svc.name }}/static-www
+#          target: /usr/share/grafana/public/static-www
+    environment:
+      GCC_PREFIX: ${GCC_PREFIX:-arm-linux-gnueabi}
+      ARCH: ${ARCH:-arm}
+    volumes:
+      - .:/repo

@@ -21,18 +21,21 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: install dependecies
+    - name: install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install --yes "gcc-${{ matrix.target.gcc_prefix }}" libncurses5-dev
+        sudo apt-get install --yes \
+          build-essential \
+          libncurses5-dev \
+          "gcc-${{ matrix.target.gcc_prefix }}" 
 
     - name: make
       run: |
         export ARCH="${{ matrix.target.arch }}"
         export CROSS_COMPILE="${{ matrix.target.gcc_prefix }}-"
 
-        make distclean
         cp configs/${{ matrix.target.name }}_defconfig .config
+        yes "" | make oldconfig
         make -j$(nproc) install
 
     - name: upload artifacts
